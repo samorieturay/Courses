@@ -39,3 +39,4 @@ function builder(list1, list2) {
 let keys1 = ["a", "b", "c"];
 let values = [1, 2, 3];
 console.log(builder(keys1, values)); // { a: 1, b: 2, c: 3 }
+console.log("2" + 2 - "2");
