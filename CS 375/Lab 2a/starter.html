@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Starter</title>
+	<style type="text/css">
+		/* TODO */
+		table {
+			border-collapse: collapse;
+		}
+		td {
+			border: 1px solid black;
+			padding: 5px;
+		}
+	</style>
+	</head>
+<body>
+	<div id="countContainer">0</div>
+	<button id="start">Start</button>
+	<button id="stop">Stop</button>
+
+	<table>
+		<tbody id="number-grid"></tbody>
+	</table>
+
+	<button id="increment">Increment</button>
+
+	<script type="text/javascript">
+		let numberGrid = [[1, 2, 3], [4, 5, 6]];
+
+		function incrementGrid() {
+			// don't modify this function
+			for (let i = 0; i < numberGrid.length; i++) {
+				for (let j = 0; j < numberGrid[0].length; j++) {
+					numberGrid[i][j]++;
+				}
+			}
+		}
+
+		// TODO
+	let startButton = document.getElementById("start");
+    let stopButton = document.getElementById("stop");
+    let countContainer = document.getElementById("countContainer");
+    let incrementButton = document.getElementById("increment");
+
+    let count = 1;
+    let intervalId;
+
+	function incrementBy1 () {
+		countContainer.textContent = count;
+		count++;
+	}
+
+    function onClick() {
+      intervalId = setInterval(() => {
+        countContainer.textContent = count;
+        count++;
+      }, 500);
+    }
+
+	function incrementBy1 () {
+		
+	}
+    function endTime() {
+      clearInterval(intervalId);
+    }
+
+
+	function createTable() {
+		const tbody = document.getElementById("number-grid");
+		let row1 = document.createElement("tr");
+		tbody.append(row1);
+		let row2 = document.createElement("tr");
+		tbody.append(row2);
+		
+		row1.append(document.createElement("td"));
+		row1.append(document.createElement("td"));
+		row1.append(document.createElement("td"));
+
+		row2.append(document.createElement("td"));
+		row2.append(document.createElement("td"));
+		row2.append(document.createElement("td"));
+
+
+
+	}
+    startButton.addEventListener("click", onClick);
+    stopButton.addEventListener("click", endTime);
+	incrementButton.addEventListener("click", createTable);
+	
+
+	
+	</script>
+</body>
+</html>
