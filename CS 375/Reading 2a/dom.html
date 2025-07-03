@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DOM</title>
+    <style>
+      div {
+        border: 1px solid black;
+        margin: 5px;
+        padding: 5px;
+      }
+      .foo {
+        width: 25px;
+        height: 25px;
+        background: red;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="p1">I am a paragraph</p>
+    <p class="abc">I am another paragraph</p>
+    <p class="abc" id="p3">I am a third paragraph</p>
+
+    <div id="container">
+      A
+      <div>B</div>
+      <div>
+        C
+        <div>D</div>
+        <div>E</div>
+        <div>
+          F
+          <div>G</div>
+        </div>
+      </div>
+    </div>
+
+    <button id="clicker">Click me</button>
+    <div>Number of clicks: <span id="counter">0</span></div>
+
+    <div id="appender">Append divs to me!</div>
+
+    <script>
+      // 1
+      let p3 = document.getElementById("p3");
+      p3.style.color = "red";
+
+      // 2
+      let abcElements = document.getElementsByClassName("abc");
+      for (let i = 0; i < abcElements.length; i++) {
+        abcElements[i].style.backgroundColor = "green";
+        abcElements[i].style.border = "1px solid pink";
+      }
+
+      // 3
+      let allDivs = document.getElementsByTagName("div");
+      for (let i = 0; i < allDivs.length; i++) {
+        if (allDivs[i].textContent.trim() === "E") {
+          allDivs[i].textContent = "I'm a div";
+        }
+      }
+
+      // 4
+      let count = 0;
+      let button = document.getElementById("clicker");
+      let counter = document.getElementById("counter");
+
+      button.addEventListener("click", function () {
+        count = count + 1;
+        counter.textContent = count;
+      });
+
+      // 5
+      setTimeout(function () {
+        for (let i = 0; i < allDivs.length; i++) {
+          if (allDivs[i].textContent.trim() === "A") {
+            allDivs[i].style.border = "5px solid pink";
+          }
+        }
+      }, 1500);
+
+      // 6
+      let alreadyClicked = false;
+      let appender = document.getElementById("appender");
+
+      button.addEventListener("click", function () {
+        if (alreadyClicked === false) {
+          alreadyClicked = true;
+          setInterval(function () {
+            let newDiv = document.createElement("div");
+            newDiv.textContent = "Hey";
+            appender.appendChild(newDiv);
+          }, 500);
+        }
+      });
+    </script>
+  </body>
+</html>
