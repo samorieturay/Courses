@@ -1,0 +1,38 @@
+1.
+Protocol: https  
+Domain: catalog.drexel.edu  
+Route: /undergraduate/collegeofcomputingandinformatics/computerscience/  
+Port: (implicit) 443 (default port for HTTPS)
+
+2.
+Request Method: GET – This means the client is requesting data from the server (typically to retrieve a webpage).  
+Route Requested: /foo/bar – This is the path of the resource being requested.  
+File Served: Probably an HTML file or dynamic route handler corresponding to /foo/bar.  
+User-Agent Header: Identifies the client software making the request (e.g., browser and operating system).  
+Accept-Language Header: Indicates the client prefers content in English (US and general English).  
+Request Body: No – GET requests do not have a body by HTTP specification.
+
+3.
+Status Code: 200 OK – The request was successful and the server is returning the requested resource.  
+Content-Type: text/plain – The returned content is plain text (not HTML, JSON, etc.).
+
+4.
+A single page can include many resources (HTML, CSS, JavaScript, images, fonts, analytics scripts). Each resource requires its own HTTP request, which is why many requests are sent.
+
+5.
+Responses:
+- In the browser: The server returns plain text saying "Hello!" (or similar) and may initiate additional requests for favicon or styles.
+- In the terminal (curl): You see headers and the plain response "Hello!" only.
+
+Differences in Requests:
+- curl sends minimal headers.
+- Browsers send more headers (User-Agent, Accept, Accept-Language), request additional assets (like favicon), and maintain session info (cookies, etc.).
+
+6.
+The same response is returned because the server is not routing based on path. It’s configured to respond identically to all GET requests regardless of the route.
+
+7.
+Response now includes a `Content-Type` of `text/html`.  
+In the browser: The text may be interpreted as HTML (e.g., new lines are not rendered, tags are parsed if present).  
+In curl: The raw HTML is displayed the same way as plain text.  
+The change occurs because browsers render content differently depending on the specified MIME type.
