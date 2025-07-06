@@ -44,7 +44,33 @@ public class SimpleMazeGame
 	{
 		
 		Maze maze = new Maze();
-		System.out.println("The maze does not have any rooms yet!");
+
+		// Room ID *must* start at 0
+		Room r0 = new Room(0);
+		Room r1 = new Room(1);
+
+		// Doors need to be associated with rooms
+		Door d0 = new Door(r0, r1);
+
+		// Setup all sides of r0
+		r0.setSide(Direction.North, new Wall());
+		r0.setSide(Direction.South, d0);
+		r0.setSide(Direction.East, new Wall());
+		r0.setSide(Direction.West, new Wall());
+
+		// Same for r1
+		r1.setSide(Direction.North, d0);
+		r1.setSide(Direction.South, new Wall());
+		r1.setSide(Direction.East, new Wall());
+		r1.setSide(Direction.West, new Wall());
+
+		// Add both rooms to the maze
+		maze.addRoom(r0);
+		maze.addRoom(r1);
+
+		// Must set current room to the get the ball
+		maze.setCurrentRoom(r0);
+
 		return maze;
 		
 
