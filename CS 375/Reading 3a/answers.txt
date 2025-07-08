@@ -1,0 +1,66 @@
+1.
+- curl http://localhost:3000/hey
+Yo
+- curl -X POST http://localhost:3000/hey 
+What's up?
+- curl http://localhost:3000/foo/index.html 
+Foobar
+- curl -X POST http://localhost:3000/foo/index.html
+ Cannot POST /foo/index.html
+- curl http://localhost:3000/index.html
+Cannot GET /index.html (no handler in routes.js)
+- curl http://localhost:3000/abc/1234 
+Cannot GET /abc/1234
+- curl http://localhost:3000/abc/123/def 
+Cannot GET /abc/123/def
+
+2a.
+Why 404 at /: There's no handler for "/", so Express returns a 404.
+Fix: Add app.get("/", (req, res) => res.redirect("/index.html"));
+CSS not loading: style.css is not served because express.static is commented.
+Fix: Uncomment app.use(express.static("public"));
+
+2b. Static Middleware Behavior:
+- With express.static uncommented, static assets like style.css and script.js load automatically.
+- Console logs in app.get handlers don’t appear because express.static intercepts matching requests first.
+
+3a.
+
+let count = 0;
+app.get("/count", (req, res) => {
+  count++;
+  res.send(<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <p>This URL has been visited ${count} times.</p>
+</body>
+</html>);
+});
+
+
+3b.
+- sendFile serves static, unchanging HTML.
+- needed to inject dynamic count data, so constructed the HTML with a template literal.
+
+3c. Static vs Dynamic Sites:
+- Static: Fixed content, same for all users.
+- Dynamic: Content changes based on logic, user input, or external data.
+
+4.
+
+app.use(express.json());
+app.post("/bubbles", (req, res) => {
+  if (req.body && req.body.fizzy !== undefined) {
+    res.send(${req.body.fizzy}abc);
+  } else {
+    res.send("Where is fizzy?");
+  }
+});
+
+
+Test with curl:
+- curl -X POST http://localhost:3000/bubbles -H "Content-Type: application/json" -d '{"fizzy":77}'  77abc
+- curl -X POST http://localhost:3000/bubbles -H "Content-Type: application/json" -d '{"abc":123}' Where is fizzy?

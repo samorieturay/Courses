@@ -1,14 +1,8 @@
 let express = require("express");
 let app = express();
+app.use(express.static("public")); // serves files
 let hostname = "localhost";
 let port = 3000;
-function handleRequest(req, res) {
-  console.log(req.originalUrl, req.headers, req.method);
-  // res.status(200); // unnecessary
-  res.set("Content-Type", "text/plain");
-  res.send("Hello!\n");
-}
-app.get("*", handleRequest);
-app.listen(port, hostname, function () {
+app.listen(port, hostname, () => {
   console.log(`http://${hostname}:${port}`);
 });
