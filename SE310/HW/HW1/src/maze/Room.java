@@ -71,4 +71,5 @@ public class Room extends MapSite
 	{
 		return Color.WHITE;
 	}
+
 }

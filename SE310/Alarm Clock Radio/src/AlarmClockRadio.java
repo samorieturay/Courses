@@ -20,4 +20,14 @@ public class AlarmClockRadio extends AlarmClock {
     public boolean isRadioOn() {
         return radio.isOn();
     }
+
+    // AlarmClock class doesn't have direct access to the radio station since the Radio object is in the AlarmClockRadio class
+    // So we can override the checkAlarm() method in this class instead
+    @Override
+    public void checkAlarm() {
+        if (alarmOn && currentTime.equals(alarmTime) && !alarmTriggered) {
+            System.out.println("The radio is playing " + radio.getStation());
+            alarmTriggered = true;
+        }
+    }
 }

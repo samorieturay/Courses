@@ -46,17 +46,17 @@ public class Door extends MapSite
 		rooms[0] = r1;
 		rooms[1] = r2;
 	}
-	
+
 	public final boolean isOpen()
 	{
 		return open;
 	}
-	
+
 	public final void setOpen(boolean open)
 	{
 		this.open = open;
 	}
-	
+
 	public final Room getOtherSide(final Room r)
 	{
 		if (rooms[0] == r)
@@ -66,7 +66,7 @@ public class Door extends MapSite
 		else
 			return null;
 	}
-	
+
 	@Override
 	public void enter()
 	{
@@ -77,7 +77,7 @@ public class Door extends MapSite
 
 		super.notifyEntryListeners();
 	}
-	
+
 	@Override
 	public Color getColor()
 	{
