@@ -17,23 +17,49 @@
   <input id="max" name="max" type="number" />
 </div>
 
-<button id="send">Get random integer</button>
+<button id="getNumber">Get random integer</button>
 
 <div id="container"></div>
 
 <script>
 let minInput = document.getElementById("min");
 let maxInput = document.getElementById("max");
-console.log("Max input entered:", maxInput.value);
+let container = document.getElementById("container");
 
-fetch("/random?key=value").then((response) => {
-  return response.json();
-}).then((data) => {
-  console.log("Received body:", data);
-}).catch(error => {
-  console.log(error);
-})
+document.getElementById("getNumber").addEventListener("click", function() {
+  let min = minInput.value;
+  let max = maxInput.value;
+
+  let url = "/random?min=" + encodeURIComponent(min) + "&max=" + encodeURIComponent(max);
+
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      let div = document.createElement("div");
+      div.textContent = data.number;
+      if (data.number > 15) {
+        div.style.color = "blue";
+      }
+      container.appendChild(div);
+    })
+    .catch(error => {
+      console.log(error);
+    });
+});
 </script>
 
 </body>
 </html>
+
+
+<!-- 2a.
+  After you make the fetch request, you need to check if response.status is 400.
+ If it is then show an error message above the numbers div by adding a new element 
+ or changing the text of an existing one. If a later request is valid, remove or 
+ clear the error message so only numbers show up. -->
+
+ <!-- 2b.
+We always need server-side validation because client-side checks can be 
+bypassed—someone could make requests with bad data using curl or by editing JavaScript. 
+The server is the final gatekeeper and should not trust data from the client. -->
+
