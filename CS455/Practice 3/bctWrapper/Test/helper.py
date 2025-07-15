@@ -458,3 +458,4 @@ fluid_by_sex = {
     "Female": scores[scores["Sex"] == "F"]["Fluid_Intelligence"]
 }
 plot_violin(fluid_by_sex, "Fluid Intelligence by Sex", "Score")
+
