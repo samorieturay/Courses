@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Weather</title>
+</head>
+<body>
+<div>
+    <label for="zip">Zip:</label>
+    <input id="zip" type="text" />
+</div>
+<button id="send">Send request</button>
+
+<table id="temp-table" border="1" style="margin-top:20px;">
+    <tr>
+        <th>Zip Code</th>
+        <th>Feels Like (°F)</th>
+    </tr>
+</table>
+
+<script>
+let zipInput = document.getElementById("zip");
+let button = document.getElementById("send");
+let table = document.getElementById("temp-table");
+
+button.addEventListener("click", () => {
+    let zip = zipInput.value.trim();
+    fetch(`/feels-like?zip=${zip}`)
+        .then(response => response.json())
+        .then(body => {
+            // Append a new row to the table
+            let row = table.insertRow();
+            let cellZip = row.insertCell();
+            let cellTemp = row.insertCell();
+            cellZip.innerText = body.zip;
+            cellTemp.innerText = body["feels-like-fahrenheit"];
+        });
+});
+</script>
+</body>
+</html>
