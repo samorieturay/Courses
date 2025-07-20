@@ -1,0 +1,6 @@
+####Global Measures
+degree_avg
+degree_interHemisphere_avg
+degree_intraHemisphere_avg
+degree_withinModule_avg
+degree_betweenModule_avg
