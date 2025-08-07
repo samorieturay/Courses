@@ -1,0 +1,165 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+interface IQuestion {
+  +getPrompt(): String
+  +setPrompt(prompt: String): void
+  +displayQuestion(): void
+}
+
+interface IResponse {
+  +isValid(): boolean
+}
+
+abstract class Response {
+  -questionID: int
+  -responseID: int
+  -serialVersionUID: long
+}
+
+class SingularResponse {
+  -responseString: String
+  +isValid(): boolean
+}
+
+class MultiResponse {
+  -responseTable: HashTable
+  +isValid(): boolean
+}
+
+class Question {
+  -prompt: String
+  -type: String
+  -id: int
+  -questionResponse: Response
+  -serialVersionUID: long
+  +getPrompt(): String
+  +setPrompt(prompt: String): void
+  +editResponse(): void
+  +editQuestion(): void
+  +displayQuestion(): void
+}
+
+class MultipleChoiceQuestion {
+  +multipleChoiceFormat: String
+  +printQuestion(): void
+  +editQuestion(): void
+  +getMultipleChoiceFormat(): String
+  +setMultipleChoiceFormat(format: String): void
+}
+
+class TrueFalseQuestion {
+  +options: int
+  +trueFalseQuestion(): void
+  +printQuestion(): void
+  +editQuestion(): void
+}
+
+class ShortAnswerQuestion {
+  +shortAnswerLimit: int
+  +shortAnswerQuestion(): void
+  +printQuestion(): void
+  +editQuestion(): void
+  +getShortAnswerLimit(): int
+  +setShortAnswerLimit(limit: int): void
+}
+
+class EssayQuestion {
+  +essayLimit: int
+  +essayQuestion(essayLimit: int): void
+  +printQuestion(): void
+  +editQuestion(): void
+  +getWordLimit(): int
+  +setWordLimit(limit: int): void
+}
+
+class MatchingQuestion {
+  +questionTable: HashTable
+}
+
+class Survey {
+  -questions: ArrayList<Question>
+  -surveyName: String
+  -surveyID: int
+  -file_loc: String
+  -file_name: String
+  -processInput: Input
+  +printSurvey(): void
+  +editSurvey(): void
+  +createSurvey(): void
+  +saveSurvey(): void
+  +deleteSurvey(): void
+}
+
+class SurveyResponse {
+  -survey: Survey
+  -responses: List<Response>
+  -serialVersionUID: long
+}
+
+class SerializationHandler {
+  +serialize(): void
+  +deserialize(): void
+}
+
+class Input {
+  -inputData: String
+  +inputDriver(): void
+  +processInput(): void
+  +validateInput(): void
+}
+
+class Output {
+  -outputData: String
+  +outputDriver(): void
+  +printSurvey(): void
+}
+
+class Menu {
+  -output: Output
+  +Print(): void
+  +addMenu(): void
+}
+
+class SurveyAppController {
+  +printMenu(): void
+  +createMenu(): void
+  +createSurvey(): void
+  +createQuestion(): void
+  +printSurvey(): void
+}
+
+class FileHandler {
+  +newFile(): void
+  +createDirectory(): void
+  +readLines(): void
+  +appendToFile(): void
+}
+
+' Inheritance
+Question ..|> IQuestion
+Response ..|> IResponse
+SingularResponse --|> Response
+MultiResponse --|> Response
+MultipleChoiceQuestion --|> Question
+TrueFalseQuestion --|> MultipleChoiceQuestion
+ShortAnswerQuestion --|> Question
+EssayQuestion --|> ShortAnswerQuestion
+MatchingQuestion --|> Question
+
+' Composition and Associations
+Survey --> "1..*" Question : contains
+Survey --> Input : uses
+Survey --> Output : uses
+SurveyResponse --> Survey : has
+SurveyResponse --> "1..*" Response : records
+Menu --> Output : uses
+SurveyAppController --> Survey : manages
+SurveyAppController --> Menu : controls
+SurveyAppController --> Question : builds
+SerializationHandler --> Survey : serializes
+SerializationHandler --> Question : serializes
+SerializationHandler --> Response : serializes
+FileHandler --> Survey : handles files
+
+@enduml

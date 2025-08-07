@@ -1,0 +1,83 @@
+{
+  "_type": "UMLModel",
+  "_id": "model1",
+  "name": "SurveyApp",
+  "ownedElements": [
+    {
+      "_type": "UMLClassDiagram",
+      "_id": "cd1",
+      "name": "Main Diagram",
+      "ownedElements": [],
+      "diagramOwnedElements": []
+    },
+    {
+      "_type": "UMLInterface",
+      "_id": "IQuestion",
+      "name": "IQuestion",
+      "operations": [
+        { "_type": "UMLOperation", "name": "getPrompt", "returnType": "String" },
+        { "_type": "UMLOperation", "name": "setPrompt", "parameters": [{ "_type": "UMLParameter", "name": "prompt", "type": "String" }], "returnType": "void" },
+        { "_type": "UMLOperation", "name": "displayQuestion", "returnType": "void" }
+      ]
+    },
+    {
+      "_type": "UMLInterface",
+      "_id": "IResponse",
+      "name": "IResponse",
+      "operations": [
+        { "_type": "UMLOperation", "name": "isValid", "returnType": "boolean" }
+      ]
+    },
+    {
+      "_type": "UMLClass",
+      "_id": "Question",
+      "name": "Question",
+      "attributes": [
+        { "_type": "UMLAttribute", "name": "prompt", "type": "String", "visibility": "private" },
+        { "_type": "UMLAttribute", "name": "type", "type": "String", "visibility": "private" },
+        { "_type": "UMLAttribute", "name": "id", "type": "int", "visibility": "private" },
+        { "_type": "UMLAttribute", "name": "questionResponse", "type": "Response", "visibility": "private" },
+        { "_type": "UMLAttribute", "name": "serialVersionUID", "type": "long", "visibility": "private" }
+      ],
+      "operations": [
+        { "_type": "UMLOperation", "name": "getPrompt", "returnType": "String" },
+        { "_type": "UMLOperation", "name": "setPrompt", "returnType": "void" },
+        { "_type": "UMLOperation", "name": "editResponse", "returnType": "void" },
+        { "_type": "UMLOperation", "name": "displayQuestion", "returnType": "void" }
+      ]
+    },
+    {
+      "_type": "UMLClass",
+      "_id": "Response",
+      "name": "Response",
+      "isAbstract": true,
+      "attributes": [
+        { "_type": "UMLAttribute", "name": "questionID", "type": "int" },
+        { "_type": "UMLAttribute", "name": "responseID", "type": "int" },
+        { "_type": "UMLAttribute", "name": "serialVersionUID", "type": "long" }
+      ]
+    },
+    {
+      "_type": "UMLClass",
+      "_id": "SingularResponse",
+      "name": "SingularResponse",
+      "attributes": [
+        { "_type": "UMLAttribute", "name": "responseString", "type": "String" }
+      ],
+      "operations": [
+        { "_type": "UMLOperation", "name": "isValid", "returnType": "boolean" }
+      ]
+    },
+    {
+      "_type": "UMLClass",
+      "_id": "MultiResponse",
+      "name": "MultiResponse",
+      "attributes": [
+        { "_type": "UMLAttribute", "name": "responseTable", "type": "HashTable" }
+      ],
+      "operations": [
+        { "_type": "UMLOperation", "name": "isValid", "returnType": "boolean" }
+      ]
+    }
+  ]
+}

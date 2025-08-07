@@ -1,0 +1,122 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+interface IQuestion {
+  +getPrompt(): String
+  +setPrompt(prompt: String): void
+  +displayQuestion(): void
+}
+
+interface IResponse {
+  +isValid(): boolean
+}
+
+abstract class Response {
+  -questionID: int
+  -responseID: int
+  -serialVersionUID: long
+}
+
+class SingularResponse {
+  -responseString: String
+  +isValid(): boolean
+}
+
+class MultiResponse {
+  -responseTable: HashTable
+  +isValid(): boolean
+}
+
+class Question {
+  -prompt: String
+  -type: String
+  -id: int
+  -questionResponse: Response
+  -serialVersionUID: long
+  +getPrompt(): String
+  +setPrompt(): void
+  +editResponse(): void
+  +editQuestion(): void
+  +displayQuestion(): void
+}
+
+class Survey {
+  -questions: ArrayList<Question>
+  -surveyName: String
+  -surveyID: int
+  -file_loc: String
+  -file_name: String
+  -processInput: Input
+  +printSurvey(): void
+  +editSurvey(): void
+  +createSurvey(): void
+  +saveSurvey(): void
+  +deleteSurvey(): void
+}
+
+class SurveyResponse {
+  -survey: Survey
+  -responses: List<Response>
+  -serialVersionUID: long
+}
+
+class SerializationHandler {
+  +serialize(): void
+  +deserialize(): void
+}
+
+class Input {
+  -inputData: String
+  +inputDriver(): void
+  +processInput(): void
+  +validateInput(): void
+}
+
+class Output {
+  -outputData: String
+  +outputDriver(): void
+  +printSurvey(): void
+}
+
+class Menu {
+  -output: Output
+  +Print(): void
+  +addMenu(): void
+}
+
+class SurveyAppController {
+  +printMenu(): void
+  +createMenu(): void
+  +createSurvey(): void
+  +createQuestion(): void
+  +printSurvey(): void
+}
+
+class MultipleChoiceQuestion {
+  +multipleChoiceFormat: String
+}
+class EssayQuestion { +essayLimit: int }
+class MatchingQuestion { +questionTable: HashTable }
+class TrueFalseQuestion { +options: int }
+class ShortAnswerQuestion { +shortAnswerLimit: int }
+
+Question ..|> IQuestion
+Response ..|> IResponse
+SingularResponse --|> Response
+MultiResponse --|> Response
+MultipleChoiceQuestion --|> Question
+EssayQuestion --|> Question
+MatchingQuestion --|> Question
+TrueFalseQuestion --|> Question
+ShortAnswerQuestion --|> Question
+Survey --> Question
+Survey --> Input
+Survey --> Output
+SurveyResponse --> Survey
+SurveyResponse --> Response
+Menu --> Output
+SurveyAppController --> Survey
+SurveyAppController --> Menu
+SurveyAppController --> Question
+
+@enduml
