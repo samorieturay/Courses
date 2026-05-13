@@ -1,0 +1,235 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+
+' ===== Enums =====
+enum MenuState {
+  MAIN
+  SURVEY_CREATE
+  SURVEY_MODIFY
+  SURVEY_TAKE
+  SURVEY_RESPONSES
+  TEST_CREATE
+  TEST_MODIFY
+  TEST_TAKE
+  TEST_GRADE
+  EXIT
+}
+
+' ===== Top-level driver / UI =====
+class Main {
+  +main(args: String[]): void
+}
+
+class Menu {
+  -surveyManager: SurveyManager
+  -testManager: TestManager
+  -state: MenuState
+  -input: Input
+  +Menu()
+  +start(): void
+  +display(): void
+  +nextState(cmd: String): void
+  +handleMainMenu(cmd: String): void
+  +displayMainMenu(): void
+}
+
+' ===== Shared I/O & storage =====
+class Input {
+  -scanner: Scanner
+  +getString(): String
+  +getInteger(): int
+  +getInteger(min: int, max: int): int
+}
+
+class Output {
+  +makeDir(path: String): void
+  +fileExists(path: String): boolean
+  +fileExistsAndMkDirs(path: String): boolean
+  +ensureDirectoriesExist(): void
+}
+
+class IO {
+  +input: Input
+  +output: Output
+}
+
+class StorageService {
+  +saveDefinition(obj: Object, path: String, name: String): void
+  +loadDefinition(type: Class, path: String): Object
+  +saveResponse(obj: Object, path: String, name: String): void
+  +loadResponse(type: Class, path: String): Object
+}
+
+' ===== Survey domain =====
+class SurveyManager {
+  -io: IO
+  -storage: StorageService
+  -dir: String
+  -dirSurvey: Path
+  -dirFiles: Path
+  -currentSurvey: Survey
+  +SurveyManager(io: IO, storage: StorageService)
+  +createNewSurvey(): void
+  +modifyCurrentSurvey(): void
+  +displaySurvey(): void
+  +saveSurvey(): void
+  +loadSurvey(name: String): boolean
+  +takeCurrentSurvey(): void
+  +displaySurveyResponses(): void
+  +tabulateSurvey(): Results
+  +addQuestion(): void
+  +handleQuestionCreationMenu(): void
+}
+
+class Survey {
+  -questions: List~Question~
+  -name: String
+  -time: String
+  +Survey(name: String, time: String)
+  +getName(): String
+  +getQuestions(): List~Question~
+  +addQuestion(q: Question): void
+  +setQuestion(i: int, q: Question): void
+  +display(): void
+}
+
+' ===== Responses (shared) =====
+abstract class Response {
+  -assessmentName: String
+  -responses: Map~int, List~String~~
+  +getName(): String
+  +getResponses(): Map~int, List~String~~
+  +display(): void
+}
+class SurveyResponse extends Response {}
+class TestResponse extends Response {}
+
+' ===== Questions =====
+abstract class Question {
+  #prompt: String
+  +display(): void
+  +setPrompt(prompt: String): void
+  +getPrompt(): String
+  +getAnswer(input: Input): String
+  +modifyPrompt(input: Input): void
+}
+
+class TrueFalse extends Question {}
+
+class MultipleChoice extends Question {
+  -choices: List~String~
+  -expectedResponses: int
+  +MultipleChoice(prompt: String, choices: List~String~, expectedResponses: int)
+  +getMultipleAnswer(input: Input): String
+  +getSingleChoice(input: Input): String
+}
+
+class ShortAnswer extends Question {}
+
+class Essay extends Question {
+  -expectedResponses: int
+}
+
+class Matching extends Question {
+  -leftColumn: List~String~
+  -rightColumn: List~String~
+}
+
+class ValidDate extends Question {
+  -dateTimeFormatter: String
+}
+
+' ===== Test (separate from Survey / Questions) =====
+class Test {
+  -name: String
+  -time: String
+  -questions: List~Question~
+  -answerKey: AnswerKey
+  +Test(name: String, time: String)
+  +getName(): String
+  +getQuestions(): List~Question~
+  +getAnswerKey(): AnswerKey
+  +addQuestion(q: Question): void
+  +setQuestion(i: int, q: Question): void
+  +display(showCorrect: boolean): void
+}
+
+class AnswerKey {
+  -correct: Map~int, List~String~~
+  +setCorrect(index: int, values: List~String~): void
+  +getCorrect(index: int): List~String~
+}
+
+' ===== Test management =====
+class TestManager {
+  -io: IO
+  -storage: StorageService
+  -dir: String
+  -dirTest: Path
+  -dirFiles: Path
+  -currentTest: Test
+  +TestManager(io: IO, storage: StorageService)
+  +createNewTest(): void
+  +modifyCurrentTest(): void
+  +displayTest(withAnswers: boolean): void
+  +saveTest(): void
+  +loadTest(name: String): boolean
+  +takeCurrentTest(): void
+  +displayTestResponses(): void
+  +gradeCurrentTest(): Results
+  +tabulateTest(): Results
+}
+
+' ===== Grading & Results =====
+class Grader {
+  +grade(test: Test, resp: TestResponse): Results
+}
+note right of Grader
+All-or-nothing; equal weights.
+Auto-grade: TF, MC, Matching, ValidDate, ShortAnswer.
+Essay not auto-graded.
+scorePercent = correct / totalQuestions  (e.g., 10/12 = 83.3%)
+end note
+
+class Results {
+  +totalQuestions: int
+  +gradableQuestions: int
+  +correct: int
+  +scorePercent: double
+  +notes: List~String~
+  +display(): void
+}
+
+class Tabulator {
+  +tabulate(name: String, responses: List~Response~): Results
+}
+
+' ===== Utilities =====
+class QuestionFactory {
+  +getQuestion(index: int): Question
+}
+
+' ===== Relationships =====
+Main --> Menu
+Menu *-- SurveyManager
+Menu *-- TestManager
+Menu --> Input
+
+IO *-- Input
+IO *-- Output
+SurveyManager --> IO
+SurveyManager --> StorageService
+SurveyManager *-- Survey
+Survey --> "0..*" Question
+SurveyManager --> SurveyResponse
+SurveyManager --> Tabulator
+
+TestManager --> IO
+TestManager --> StorageService
+TestManager *-- Test
+Test *-- AnswerKey
+TestManager --> TestResponse
+TestManager --> Grader
+TestManager --> Tabulator
+@enduml

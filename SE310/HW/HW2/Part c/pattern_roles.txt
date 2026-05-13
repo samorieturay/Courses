@@ -1,0 +1,126 @@
+HW2 Part C – Design Pattern Roles
+Author: Sam Turay Jr
+
+Project: Survey/Test Generation System
+Patterns used: Strategy, Bridge, Factory Method, Observer, Façade, Adapter, Command
+
+STRATEGY
+Intent
+Define a family of grading policies, encapsulate each one, and make them interchangeable. The Grader delegates to a selected policy without changing client code.
+
+Why
+Exam requires “no partial credit, equal weights, essay not auto-graded.” This is modeled as one concrete policy now (EqualWeightAllOrNothing) and allows new policies later (Curve, PartialCredit) without touching TestManager or domain classes.
+
+Participants / Roles
+Strategy: GradingStrategy
+ConcreteStrategy: EqualWeightAllOrNothing
+Context: Grader
+Client: TestManager
+Data used by strategies: Test, TestResponse, AnswerKey
+
+Correctness Notes
+Context holds a Strategy reference and delegates grade().
+Strategy is replaceable at runtime; policies do not leak into Test/Survey/Question.
+Policy note: Auto grade supports TF, MC, Matching, ValidDate, ShortAnswer. Essays excluded from auto grading but included in denominator.
+
+BRIDGE
+Intent
+Decouple the abstraction (Question) from the implementation (AnswerFormat) so the two can vary independently and we avoid subclass explosion.
+
+Why
+Question types (TrueFalse, Matching, etc.) and answer capture/validation mechanics (BooleanFormat, MultiChoiceFormat, ...) vary independently. Bridge keeps input/validation pluggable and reusable.
+
+Participants / Roles
+Abstraction: Question
+RefinedAbstractions: TrueFalse, MultipleChoice, ShortAnswer, Essay, Matching, ValidDate
+Implementor: AnswerFormat
+ConcreteImplementors: BooleanFormat, MultiChoiceFormat, MatchingFormat, TextFormat, DateFormat
+
+Correctness Notes
+Question *- AnswerFormat (composition) emphasizes Bridge.
+Abstraction delegates display/capture/validate to Implementor.
+Either side can gain new variants without changing the other.
+
+FACTORY METHOD
+Intent
+Let subclasses (creators) decide which Question product to instantiate; creation is encapsulated behind a method.
+
+Why
+Menu/managers ask a factory to create the right Question (and configure its AnswerFormat) from user choices, keeping creation logic centralized and testable.
+
+Participants / Roles
+Creator: QuestionFactory
+ConcreteCreator: DefaultQuestionFactory
+Product: Question (with its configured AnswerFormat)
+Clients: SurveyManager, TestManager
+
+Correctness Notes
+Factory returns base type Question; callers are unaware of concrete subclasses or format wiring.
+UML shows dependency DefaultQuestionFactory -> AnswerFormat : configures.
+
+OBSERVER
+Intent
+Define a one to many dependency so that when a subject changes state, all its dependents are notified and updated automatically.
+
+Why
+Decouple “events” (e.g., saved survey, graded test) from multiple interested reactions (UI view, audit logging).
+
+Participants / Roles
+Subject: Subject (interface)
+ConcreteSubject: EventBus
+Observer: Observer (interface)
+ConcreteObservers: ResultsView, AuditLogger
+Publishers: SurveyManager (SURVEY_SAVED), TestManager (TEST_GRADED)
+
+Correctness Notes
+Observers subscribe to EventBus via attach(); shown with dashed dependencies.
+Subject stereotype fixed (<<Subject>> only).
+
+FACADE
+Intent
+Provide a unified, simplified interface to a set of subsystem services.
+
+Why
+Managers orchestrate I/O, storage, question creation, responses, and grading without exposing the subsystems to UI/commands.
+
+Participants / Roles
+Façades: SurveyManager, TestManager
+Subsystems they wrap: IO, StoragePort, QuestionFactory, Grader, EventBus
+
+Correctness Notes
+Clients (Menu/Commands) depend only on the façade methods; subsystem changes are localized.
+
+ADAPTER
+Intent
+Convert the interface of an external persistence mechanism to the interface clients expect.
+
+Why
+Make underlying JSON/file/DB APIs look like a clean StoragePort used throughout the app.
+
+Participants / Roles
+Target: StoragePort
+Adapter: JsonStorageAdapter
+Adaptee: FileSystemJsonLib (explicitly shown in UML)
+Clients: SurveyManager, TestManager
+
+Correctness Notes
+UML shows composition from Adapter to Adaptee.
+Managers code to StoragePort; swapping persistence requires only a different adapter implementation.
+
+COMMAND
+Intent
+Encapsulate a request as an object, thereby letting you parameterize menus, queue/undo later, and decouple UI from receivers.
+
+Why
+Menu maps user actions to command objects that operate on receivers (the managers).
+
+Participants / Roles
+Invoker: Menu
+Command: Command
+ConcreteCommands: CreateSurveyCommand, ModifyTestCommand, TakeSurveyCommand, TakeTestCommand, GradeTestCommand
+Receivers: SurveyManager, TestManager
+
+Correctness Notes
+Menu stereotype fixed (<<Invoker>> only).
+Commands depend on receivers explicitly.
+UI is decoupled from application logic and is easily extended.

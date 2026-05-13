@@ -1,0 +1,303 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+
+' =========================
+' App Shell + Menu (Command)
+' =========================
+enum MenuState {
+  MAIN
+  SURVEY_CREATE
+  SURVEY_MODIFY
+  SURVEY_TAKE
+  SURVEY_RESPONSES
+  TEST_CREATE
+  TEST_MODIFY
+  TEST_TAKE
+  TEST_GRADE
+  EXIT
+}
+
+class Main {
+  +main(args: String[]): void
+}
+
+' Invoker for Command
+class Menu <<Invoker>> {
+  -state: MenuState
+  -input: Input
+  -commands: Map~String, Command~
+  +Menu()
+  +display(): void
+  +setCommand(key: String, cmd: Command): void
+  +runCommand(key: String): void
+}
+
+interface Command <<Command>> {
+  +execute(): void
+}
+class CreateSurveyCommand <<ConcreteCommand>> implements Command
+class ModifyTestCommand  <<ConcreteCommand>> implements Command
+class TakeSurveyCommand  <<ConcreteCommand>> implements Command
+class TakeTestCommand    <<ConcreteCommand>> implements Command
+class GradeTestCommand   <<ConcreteCommand>> implements Command
+
+' =========================
+' I/O + Storage (Adapter)
+' =========================
+class Input {
+  -scanner: Scanner
+  +getString(): String
+  +getInteger(): int
+  +getInteger(min: int, max: int): int
+}
+
+class Output {
+  +makeDir(path: String): void
+  +fileExists(path: String): boolean
+  +fileExistsAndMkDirs(path: String): boolean
+  +ensureDirectoriesExist(): void
+}
+
+class IO {
+  +input: Input
+  +output: Output
+}
+
+interface StoragePort <<Target>> {
+  +saveDefinition(obj: Object, path: String, name: String): void
+  +loadDefinition(type: Class, path: String): Object
+  +saveResponse(obj: Object, path: String, name: String): void
+  +loadResponse(type: Class, path: String): Object
+}
+
+class JsonStorageAdapter <<Adapter>> {
+  -adaptee: FileSystemJsonLib
+  +saveDefinition(obj: Object, path: String, name: String): void
+  +loadDefinition(type: Class, path: String): Object
+  +saveResponse(obj: Object, path: String, name: String): void
+  +loadResponse(type: Class, path: String): Object
+}
+
+class FileSystemJsonLib <<Adaptee>> {
+  +write(path: String, name: String, json: String): void
+  +read(path: String, name: String): String
+}
+
+JsonStorageAdapter *-- FileSystemJsonLib
+JsonStorageAdapter ..|> StoragePort
+
+' =========================
+' Survey/Test façades (Façade)
+' =========================
+class SurveyManager <<Façade>> {
+  -io: IO
+  -storage: StoragePort
+  -currentSurvey: Survey
+  -questionFactory: QuestionFactory
+  -eventBus: Subject
+  +createNewSurvey(): void
+  +modifyCurrentSurvey(): void
+  +displaySurvey(): void
+  +saveSurvey(): void
+  +loadSurvey(name: String): boolean
+  +takeCurrentSurvey(): void
+  +displaySurveyResponses(): void
+}
+
+class TestManager <<Façade>> {
+  -io: IO
+  -storage: StoragePort
+  -currentTest: Test
+  -questionFactory: QuestionFactory
+  -grader: Grader
+  -eventBus: Subject
+  +createNewTest(): void
+  +modifyCurrentTest(): void
+  +displayTest(withAnswers: boolean): void
+  +saveTest(): void
+  +loadTest(name: String): boolean
+  +takeCurrentTest(): void
+  +displayTestResponses(): void
+  +gradeCurrentTest(): Results
+}
+
+' =========================
+' Assessments
+' =========================
+abstract class Assessment {
+  -name: String
+  -time: String
+  -questions: List~Question~
+  +getName(): String
+  +getQuestions(): List~Question~
+  +display(): void
+}
+
+class Survey extends Assessment
+
+class Test extends Assessment {
+  -answerKey: AnswerKey
+  +getAnswerKey(): AnswerKey
+  +display(showCorrect: boolean): void
+}
+
+class AnswerKey {
+  -correct: Map~int, List~String~~
+  +setCorrect(index: int, values: List~String~): void
+  +getCorrect(index: int): List~String~
+}
+
+' =========================
+' Responses
+' =========================
+abstract class Response {
+  -assessmentName: String
+  -responses: Map~int, List~String~~
+  +getName(): String
+  +getResponses(): Map~int, List~String~~
+  +display(): void
+}
+
+class SurveyResponse extends Response
+class TestResponse   extends Response
+
+' =========================
+' Strategy (grading)
+' =========================
+interface GradingStrategy <<Strategy>> {
+  +grade(test: Test, resp: TestResponse, key: AnswerKey): Results
+}
+class EqualWeightAllOrNothing <<ConcreteStrategy>> implements GradingStrategy
+
+class Grader {
+  -strategy: GradingStrategy
+  +Grader(strategy: GradingStrategy)
+  +grade(test: Test, resp: TestResponse): Results
+}
+
+class Results {
+  +totalQuestions: int
+  +gradableQuestions: int
+  +correct: int
+  +scorePercent: double
+  +notes: List~String~
+  +display(): void
+}
+
+
+' =========================
+' Bridge (Question <-> AnswerFormat)
+' =========================
+abstract class Question <<Abstraction,Bridge>> {
+  #prompt: String
+  -format: AnswerFormat
+  +display(): void
+  +setPrompt(prompt: String): void
+  +getPrompt(): String
+  +getAnswer(input: Input): List~String~
+  +setFormat(fmt: AnswerFormat): void
+}
+
+interface AnswerFormat <<Implementor,Bridge>> {
+  +displayPrompt(prompt: String): void
+  +capture(input: Input): List~String~
+  +validate(values: List~String~): List~String~
+}
+
+class BooleanFormat <<ConcreteImplementor>> implements AnswerFormat
+class MultiChoiceFormat <<ConcreteImplementor>> implements AnswerFormat {
+  -choices: List~String~
+  -expected: int
+}
+class MatchingFormat <<ConcreteImplementor>> implements AnswerFormat {
+  -left: List~String~
+  -right: List~String~
+}
+class TextFormat <<ConcreteImplementor>> implements AnswerFormat
+class DateFormat <<ConcreteImplementor>> implements AnswerFormat {
+  -pattern: String
+}
+
+class TrueFalse      <<RefinedAbstraction>> extends Question
+class MultipleChoice <<RefinedAbstraction>> extends Question
+class ShortAnswer    <<RefinedAbstraction>> extends Question
+class Essay          <<RefinedAbstraction>> extends Question
+class Matching       <<RefinedAbstraction>> extends Question
+class ValidDate      <<RefinedAbstraction>> extends Question
+
+' composition to emphasize Bridge connection
+Question *-- AnswerFormat
+
+' =========================
+' Factory Method (questions)
+' =========================
+abstract class QuestionFactory <<Factory Method,Creator>> {
+  +createQuestion(kind: String, args: Map~String,Object~): Question
+}
+class DefaultQuestionFactory <<ConcreteCreator>> extends QuestionFactory
+DefaultQuestionFactory --> AnswerFormat : configures
+
+' =========================
+' Observer (events)
+' =========================
+interface Subject <<Subject>> {
+  +attach(event: String, obs: Observer): void
+  +detach(event: String, obs: Observer): void
+  +notify(event: String, data: Object): void
+}
+
+interface Observer {
+  +update(event: String, data: Object): void
+}
+
+class EventBus <<ConcreteSubject>> implements Subject {
+  -subscribers: Map~String, List~Observer~~
+  +attach(event: String, obs: Observer): void
+  +detach(event: String, obs: Observer): void
+  +notify(event: String, data: Object): void
+}
+
+class ResultsView <<Observer>> {
+  +update(event: String, data: Object): void
+}
+class AuditLogger <<Observer>> {
+  +update(event: String, data: Object): void
+}
+
+' =========================
+' Wiring
+' =========================
+Main --> Menu
+Menu --> Input
+Menu *-- CreateSurveyCommand
+Menu *-- ModifyTestCommand
+Menu *-- TakeSurveyCommand
+Menu *-- TakeTestCommand
+Menu *-- GradeTestCommand
+
+CreateSurveyCommand --> SurveyManager
+ModifyTestCommand  --> TestManager
+TakeSurveyCommand  --> SurveyManager
+TakeTestCommand    --> TestManager
+GradeTestCommand   --> TestManager
+
+SurveyManager --> IO
+SurveyManager --> StoragePort
+SurveyManager *-- Survey
+SurveyManager --> QuestionFactory
+SurveyManager --> Subject : publish("SURVEY_SAVED")
+
+TestManager --> IO
+TestManager --> StoragePort
+TestManager *-- Test
+TestManager --> QuestionFactory
+TestManager --> Grader
+TestManager --> Subject : publish("TEST_GRADED")
+
+' Observer subscribe paths (make it explicit)
+ResultsView ..> EventBus : attach("SURVEY_SAVED")
+AuditLogger ..> EventBus : attach("TEST_GRADED")
+
+DefaultQuestionFactory --> Question
+@enduml
